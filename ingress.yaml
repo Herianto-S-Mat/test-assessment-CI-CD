@@ -1,0 +1,130 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: assessment-ingress
+  labels:
+    app: assessment-app
+  annotations:
+    # Nginx Ingress Controller annotations
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # Rate limiting
+    nginx.ingress.kubernetes.io/rate-limit-connections: "10"
+    nginx.ingress.kubernetes.io/rate-limit-rpm: "300"
+
+    # Timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+
+    # Body size limit
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+    # CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+
+    # Health check
+    nginx.ingress.kubernetes.io/upstream-vhost: "assessment-service"
+
+    # Certificate manager (jika menggunakan cert-manager)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - assessment-app.yourdomain.com
+      secretName: assessment-tls-secret
+  rules:
+    - host: assessment-app.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-service
+                port:
+                  number: 80
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-service
+                port:
+                  number: 80
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-service
+                port:
+                  number: 80
+
+---
+# Ingress untuk environment development
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: assessment-ingress-dev
+  namespace: development
+  labels:
+    app: assessment-app
+    environment: development
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "20"
+    nginx.ingress.kubernetes.io/rate-limit-rpm: "600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: dev.assessment-app.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-service
+                port:
+                  number: 80
+
+---
+# Ingress untuk environment staging
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: assessment-ingress-staging
+  namespace: staging
+  labels:
+    app: assessment-app
+    environment: staging
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit-connections: "15"
+    nginx.ingress.kubernetes.io/rate-limit-rpm: "450"
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - staging.assessment-app.yourdomain.com
+      secretName: assessment-staging-tls-secret
+  rules:
+    - host: staging.assessment-app.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-service
+                port:
+                  number: 80
