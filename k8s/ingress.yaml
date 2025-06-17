@@ -97,34 +97,34 @@ spec:
 
 ---
 # Ingress untuk environment staging
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: assessment-ingress-staging
-  namespace: staging
-  labels:
-    app: assessment-app
-    environment: staging
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/rate-limit-connections: "15"
-    nginx.ingress.kubernetes.io/rate-limit-rpm: "450"
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
-spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - staging.assessment-app.yourdomain.com
-      secretName: assessment-staging-tls-secret
-  rules:
-    - host: staging.assessment-app.yourdomain.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: assessment-service
-                port:
-                  number: 80
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: assessment-ingress-staging
+#  namespace: staging
+#  labels:
+#    app: assessment-app
+#    environment: staging
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+#    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+#    nginx.ingress.kubernetes.io/rate-limit-connections: "15"
+#    nginx.ingress.kubernetes.io/rate-limit-rpm: "450"
+#    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+#spec:
+#  ingressClassName: nginx
+#  tls:
+#    - hosts:
+#        - staging.assessment-app.yourdomain.com
+#      secretName: assessment-staging-tls-secret
+#  rules:
+#    - host: staging.assessment-app.yourdomain.com
+#      http:
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: assessment-service
+#                port:
+#                  number: 80

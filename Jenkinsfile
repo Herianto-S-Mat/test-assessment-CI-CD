@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = 'docker.io'
-        DOCKER_IMAGE = 'your-username/assessment-app'
+        DOCKER_IMAGE = 'herianto9671/assessment-app:latest'
         DOCKER_TAG = "${BUILD_NUMBER}"
         KUBECONFIG = credentials('kubeconfig')
         DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
@@ -11,7 +11,7 @@ pipeline {
 
     tools {
         maven 'Maven-3.8'
-        jdk 'OpenJDK-17'
+        jdk 'OpenJDK-24'
     }
 
     stages {

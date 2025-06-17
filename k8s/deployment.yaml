@@ -4,14 +4,8 @@ metadata:
   name: assessment-app
   labels:
     app: assessment-app
-    version: v1
 spec:
-  replicas: 3
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
+  replicas: 1
   selector:
     matchLabels:
       app: assessment-app
@@ -19,103 +13,22 @@ spec:
     metadata:
       labels:
         app: assessment-app
-        version: v1
     spec:
       containers:
         - name: assessment-app
-          image: your-username/assessment-app:IMAGE_TAG
-          imagePullPolicy: Always
+          image: herianto9671/assessment-app:latest
           ports:
             - containerPort: 8080
-              name: http
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "kubernetes"
-            - name: SERVER_PORT
-              value: "8080"
-            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
-              value: "health,info"
-          envFrom:
-            - configMapRef:
-                name: app-config
-            - secretRef:
-                name: app-secrets
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "200m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 30
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 1000
-            runAsGroup: 1000
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
-          volumeMounts:
-            - name: tmp-volume
-              mountPath: /tmp
-            - name: logs-volume
-              mountPath: /app/logs
-      volumes:
-        - name: tmp-volume
-          emptyDir: {}
-        - name: logs-volume
-          emptyDir: {}
-      securityContext:
-        fsGroup: 1000
-      serviceAccountName: assessment-app-sa
-      automountServiceAccountToken: false
-
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Service
 metadata:
-  name: app-config
-data:
-  LOG_LEVEL: "INFO"
-  SERVER_PORT: "8080"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: app-secrets
-type: Opaque
-data:
-  APP_SECRET: bXlfc2VjcmV0X2tleQ==     # my_secret_key (base64 encoded)
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: assessment-app-sa
-automountServiceAccountToken: false
+  name: assessment-service
+spec:
+  selector:
+    app: assessment-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: NodePort
