@@ -51,6 +51,7 @@ Pipeline ini menggunakan GitFlow strategy dengan 3 environment:
 │   │   └── TestDemoController.java
 │   └── model/
 │       └── User.java
+│       └── ApiResponse.java
 ├── k8s/
 │   ├── deployment.yaml       # Kubernetes deployment + ConfigMap + Secret
 │   ├── service.yaml          # Service definitions
